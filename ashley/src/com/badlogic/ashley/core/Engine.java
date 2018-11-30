@@ -45,8 +45,6 @@ public class Engine {
 	
 	private final Listener<Entity> componentAdded = new ComponentListener();
 	private final Listener<Entity> componentRemoved = new ComponentListener();
-	private final Listener<EntityComponentWrapper> componentInstanceAdded = new AddComponentInstanceListener();
-	private final Listener<EntityComponentWrapper> componentInstanceRemoved = new RemoveComponenInstanceListener();
 	
 	private SystemManager systemManager = new SystemManager(new EngineSystemListener());
 	private EntityManager entityManager = new EntityManager(new EngineEntityListener());
@@ -257,48 +255,24 @@ public class Engine {
 	protected void addEntityInternal(Entity entity) {
 		entity.componentAdded.add(componentAdded);
 		entity.componentRemoved.add(componentRemoved);
-		entity.componentInstanceAdded.add(componentInstanceAdded);
-		entity.componentInstanceRemoved.add(componentInstanceRemoved);
 		entity.componentOperationHandler = componentOperationHandler;
+		entity.componentInstanceListener = componentInstanceListener;
 		
 		componentInstanceListener.addEntity(entity);
 		familyManager.updateFamilyMembership(entity);
 	}
 	
 	protected void removeEntityInternal(Entity entity) {
-		componentInstanceListener.removeEntity(entity);
 		familyManager.updateFamilyMembership(entity);
 
 		entity.componentAdded.remove(componentAdded);
 		entity.componentRemoved.remove(componentRemoved);
-		entity.componentInstanceAdded.remove(componentInstanceAdded);
-		entity.componentInstanceRemoved.remove(componentInstanceRemoved);
 		entity.componentOperationHandler = null;
+		entity.componentInstanceListener = null;
 	}
 	
 	public void setComponentInstanceListener(ComponentInstanceListener componentInstanceListener) {
 		this.componentInstanceListener = componentInstanceListener;
-	}
-	
-	public static class EntityComponentWrapper {
-		public Entity entity;
-		public Component component;
-	}
-	
-	private class AddComponentInstanceListener implements Listener<EntityComponentWrapper> {
-		@Override
-		public void receive(Signal<EntityComponentWrapper> signal, EntityComponentWrapper object) {
-			componentInstanceListener.added(object.entity, object.component);
-			componentOperationHandler.freeEntityComponentWrapper(object);
-		}
-	}
-	
-	private class RemoveComponenInstanceListener implements Listener<EntityComponentWrapper> {
-		@Override
-		public void receive(Signal<EntityComponentWrapper> signal, EntityComponentWrapper object) {
-			componentInstanceListener.removed(object.entity, object.component);
-			componentOperationHandler.freeEntityComponentWrapper(object);
-		}
 	}
 	
 	private class ComponentListener implements Listener<Entity> {

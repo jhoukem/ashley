@@ -1,6 +1,5 @@
 package com.badlogic.ashley.core;
 
-import com.badlogic.ashley.core.Engine.EntityComponentWrapper;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
@@ -8,7 +7,6 @@ import com.badlogic.gdx.utils.Pool;
 class ComponentOperationHandler {
 	private BooleanInformer delayed;
 	private ComponentOperationPool operationPool = new ComponentOperationPool();
-	private EntityComponentWrapperPool entityComponentWrapperPool = new EntityComponentWrapperPool();
  	private Array<ComponentOperation> operations = new Array<ComponentOperation>();
 
  	public ComponentOperationHandler(BooleanInformer delayed) {
@@ -61,14 +59,6 @@ class ComponentOperationHandler {
 		operations.clear();
 	}
 	
-	public EntityComponentWrapper poolEntityWrapperComponent(){
-		return entityComponentWrapperPool.obtain();
-	}
-	
-	public void freeEntityComponentWrapper(EntityComponentWrapper entityComponentWrapper){
-		entityComponentWrapperPool.free(entityComponentWrapper);
-	}
-	
 	private static class ComponentOperation implements Pool.Poolable {
 		public enum Type {
 			Add,
@@ -102,13 +92,6 @@ class ComponentOperationHandler {
 		@Override
 		protected ComponentOperation newObject() {
 			return new ComponentOperation();
-		}
-	}
-	
-	private static class EntityComponentWrapperPool extends Pool<EntityComponentWrapper> {
-		@Override
-		protected EntityComponentWrapper newObject () {
-			return new EntityComponentWrapper();
 		}
 	}
 	

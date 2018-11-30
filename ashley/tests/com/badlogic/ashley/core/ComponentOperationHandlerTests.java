@@ -1,11 +1,11 @@
 package com.badlogic.ashley.core;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
 import com.badlogic.ashley.core.ComponentOperationHandler.BooleanInformer;
-import com.badlogic.ashley.core.Engine.EntityComponentWrapper;
 import com.badlogic.ashley.signals.Listener;
 import com.badlogic.ashley.signals.Signal;
 
@@ -33,11 +33,16 @@ public class ComponentOperationHandlerTests {
 		}
 	}
 	
-	private static class ComponentInstanceSpy implements Listener<EntityComponentWrapper> {
+	private static class ComponentInstanceListenerSpy extends ComponentInstanceListener {
 		public boolean called;
 		
 		@Override
-		public void receive(Signal<EntityComponentWrapper> signal, EntityComponentWrapper object) {
+		public void added(Entity entity, Component object) {
+			called = true;
+		}
+		
+		@Override
+		public void removed(Entity entity, Component object) {
 			called = true;
 		}
 	}
@@ -45,26 +50,26 @@ public class ComponentOperationHandlerTests {
 	@Test
 	public void add() {
 		ComponentSpy componentSpy = new ComponentSpy();
-		ComponentInstanceSpy componentInstanceSpy = new ComponentInstanceSpy();
+		ComponentInstanceListenerSpy componentListenerSpy = new ComponentInstanceListenerSpy();
 
 		BooleanInformerMock informer = new BooleanInformerMock();
 		ComponentOperationHandler handler = new ComponentOperationHandler(informer);
 		
 		Entity entity = new Entity();
 		entity.componentOperationHandler = handler;
+		entity.componentInstanceListener = componentListenerSpy;
 		entity.componentAdded.add(componentSpy);
-		entity.componentInstanceAdded.add(componentInstanceSpy);
 		
 		handler.add(entity, new ComponentMock());
 		
 		assertTrue(componentSpy.called);
-		assertTrue(componentInstanceSpy.called);
+		assertTrue(componentListenerSpy.called);
 	}
 
 	@Test
 	public void addDelayed() {
 		ComponentSpy componentSpy = new ComponentSpy();
-		ComponentInstanceSpy componentInstanceSpy = new ComponentInstanceSpy();
+		ComponentInstanceListenerSpy componentListenerSpy = new ComponentInstanceListenerSpy();
 		BooleanInformerMock informer = new BooleanInformerMock();
 		ComponentOperationHandler handler = new ComponentOperationHandler(informer);
 		
@@ -72,40 +77,40 @@ public class ComponentOperationHandlerTests {
 		
 		Entity entity = new Entity();
 		entity.componentOperationHandler = handler;
+		entity.componentInstanceListener = componentListenerSpy;
 		entity.componentAdded.add(componentSpy);
-		entity.componentInstanceAdded.add(componentInstanceSpy);
 		
 		handler.add(entity, new ComponentMock());
 		
 		assertFalse(componentSpy.called);
-		assertFalse(componentInstanceSpy.called);
+		assertFalse(componentListenerSpy.called);
 		handler.processOperations();
 		assertTrue(componentSpy.called);
-		assertTrue(componentInstanceSpy.called);
+		assertTrue(componentListenerSpy.called);
 	}
 	
 	@Test
 	public void remove() {
 		ComponentSpy componentSpy = new ComponentSpy();
-		ComponentInstanceSpy componentInstanceSpy = new ComponentInstanceSpy();
+		ComponentInstanceListenerSpy componentListenerSpy = new ComponentInstanceListenerSpy();
 		BooleanInformerMock informer = new BooleanInformerMock();
 		ComponentOperationHandler handler = new ComponentOperationHandler(informer);
 		
 		Entity entity = new Entity();
 		entity.componentOperationHandler = handler;
+		entity.componentInstanceListener = componentListenerSpy;
 		entity.componentRemoved.add(componentSpy);
-		entity.componentInstanceRemoved.add(componentInstanceSpy);
 		
 		handler.remove(entity, new ComponentMock());
 		
 		assertTrue(componentSpy.called);
-		assertTrue(componentInstanceSpy.called);
+		assertTrue(componentListenerSpy.called);
 	}
 	
 	@Test
 	public void removeDelayed() {
 		ComponentSpy spy = new ComponentSpy();
-		ComponentInstanceSpy componentInstanceSpy = new ComponentInstanceSpy();
+		ComponentInstanceListenerSpy componentListenerSpy = new ComponentInstanceListenerSpy();
 		BooleanInformerMock informer = new BooleanInformerMock();
 		ComponentOperationHandler handler = new ComponentOperationHandler(informer);
 		
@@ -113,14 +118,14 @@ public class ComponentOperationHandlerTests {
 		
 		Entity entity = new Entity();
 		entity.componentOperationHandler = handler;
+		entity.componentInstanceListener = componentListenerSpy;
 		entity.componentRemoved.add(spy);
-		entity.componentInstanceRemoved.add(componentInstanceSpy);
 		
 		handler.remove(entity, new ComponentMock());
 		
 		assertFalse(spy.called);
 		handler.processOperations();
 		assertTrue(spy.called);
-		assertTrue(componentInstanceSpy.called);
+		assertTrue(componentListenerSpy.called);
 	}
 }
