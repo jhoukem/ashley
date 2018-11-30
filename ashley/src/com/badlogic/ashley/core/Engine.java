@@ -82,6 +82,7 @@ public class Engine {
 	public void addEntity(Entity entity){
 		boolean delayed = updating || familyManager.notifying();
 		entityManager.addEntity(entity, delayed);
+		componentInstanceListener.entityAdded(entity);
 		entity.componentInstanceListener = componentInstanceListener;
 	}
 
@@ -91,6 +92,7 @@ public class Engine {
 	public void removeEntity(Entity entity){
 		boolean delayed = updating || familyManager.notifying();
 		entityManager.removeEntity(entity, delayed);
+		componentInstanceListener.entityRemoved(entity);
 		entity.componentInstanceListener = null;
 	}
 	
@@ -259,7 +261,7 @@ public class Engine {
 		entity.componentRemoved.add(componentRemoved);
 		entity.componentOperationHandler = componentOperationHandler;
 		
-		componentInstanceListener.addEntity(entity);
+		componentInstanceListener.entityAdded(entity);
 		familyManager.updateFamilyMembership(entity);
 	}
 	

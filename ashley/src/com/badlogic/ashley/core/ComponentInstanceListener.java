@@ -34,7 +34,7 @@ public class ComponentInstanceListener {
 	 * 
 	 * @param entity The entity that has been added to the engine.
 	 */
-	public void addEntity(Entity entity) {
+	public void entityAdded(Entity entity) {
 		for(Component component : entity.getComponents()){
 			added(entity, component);
 		}
@@ -45,7 +45,7 @@ public class ComponentInstanceListener {
 	 * 
 	 * @param entity The entity that has been removed from the engine.
 	 */
-	public void removeEntity(Entity entity) {
+	public void entityRemoved(Entity entity) {
 		for(Component component : entity.getComponents()){
 			removed(entity, component);
 		}
