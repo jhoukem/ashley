@@ -13,25 +13,25 @@ class ComponentOperationHandler {
  		this.delayed = delayed;
  	}
  	
-	public void add(Entity entity, Component component) {
+	public void add(Entity entity) {
 		if (delayed.value()) {
 			ComponentOperation operation = operationPool.obtain();
-			operation.makeAdd(entity, component);
+			operation.makeAdd(entity);
 			operations.add(operation);
 		}
 		else {
-			entity.notifyComponentAdded(component);
+			entity.notifyComponentAdded();
 		}
 	}
 
-	public void remove(Entity entity, Component component) {
+	public void remove(Entity entity) {
 		if (delayed.value()) {
 			ComponentOperation operation = operationPool.obtain();
-			operation.makeRemove(entity, component);
+			operation.makeRemove(entity);
 			operations.add(operation);
 		}
 		else {
-			entity.notifyComponentRemoved(component);
+			entity.notifyComponentRemoved();
 		}
 	}
 	
@@ -45,10 +45,10 @@ class ComponentOperationHandler {
 
 			switch(operation.type) {
 				case Add:
-					operation.entity.notifyComponentAdded(operation.component);
+					operation.entity.notifyComponentAdded();
 					break;
 				case Remove:
-					operation.entity.notifyComponentRemoved(operation.component);
+					operation.entity.notifyComponentRemoved();
 					break;
 				default: break;
 			}
@@ -67,24 +67,20 @@ class ComponentOperationHandler {
 
 		public Type type;
 		public Entity entity;
-		public Component component;
 		
-		public void makeAdd(Entity entity, Component component) {
+		public void makeAdd(Entity entity) {
 			this.type = Type.Add;
 			this.entity = entity;
-			this.component = component;
 		}
 
-		public void makeRemove(Entity entity, Component component) {
+		public void makeRemove(Entity entity) {
 			this.type = Type.Remove;
 			this.entity = entity;
-			this.component = component;
 		}
 
 		@Override
 		public void reset() {
 			entity = null;
-			component = null;
 		}
 	}
 	

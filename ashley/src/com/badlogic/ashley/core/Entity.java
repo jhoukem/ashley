@@ -64,12 +64,15 @@ public class Entity {
 	 */
 	public Entity add (Component component) {
 		if (addInternal(component)) {
-			if (componentOperationHandler != null) {
-				componentOperationHandler.add(this, component);
+			if(componentInstanceListener != null){
 				componentInstanceListener.added(this, component);
 			}
+			if (componentOperationHandler != null) {
+				componentOperationHandler.add(this);
+				
+			}
 			else {
-				notifyComponentAdded(component);
+				notifyComponentAdded();
 			}
 		}
 		
@@ -98,12 +101,14 @@ public class Entity {
 			Component removeComponent = components.get(componentTypeIndex);
 	
 			if (removeComponent != null && removeInternal(componentClass) != null) {
-				if (componentOperationHandler != null) {
-					componentOperationHandler.remove(this, removeComponent);
+				if(componentInstanceListener != null){
 					componentInstanceListener.removed(this, removeComponent);
 				}
+				if (componentOperationHandler != null) {
+					componentOperationHandler.remove(this);
+				}
 				else {
-					notifyComponentRemoved(removeComponent);
+					notifyComponentRemoved();
 				}
 			}
 	
@@ -215,19 +220,12 @@ public class Entity {
 		return null;
 	}
 	
-	void notifyComponentAdded(Component component) {
+	void notifyComponentAdded() {
 		componentAdded.dispatch(this);
-
-		if(componentInstanceListener != null){ // In that case the entity is already in the engine so we dispatch an event.
-			componentInstanceListener.added(this, component);
-		}
 	}
 
-	void notifyComponentRemoved(Component component) {
+	void notifyComponentRemoved() {
 		componentRemoved.dispatch(this);
-		if(componentInstanceListener != null){ // In that case the entity is already in the engine so we dispatch an event.
-			componentInstanceListener.removed(this, component);
-		}
 	}
 
 	/** @return true if the entity is scheduled to be removed */
