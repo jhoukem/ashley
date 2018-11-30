@@ -16,6 +16,7 @@
 
 package com.badlogic.ashley.core;
 
+import com.badlogic.ashley.core.Engine.EntityComponentWrapper;
 import com.badlogic.ashley.signals.Signal;
 import com.badlogic.ashley.utils.Bag;
 import com.badlogic.ashley.utils.ImmutableArray;
@@ -33,7 +34,11 @@ public class Entity {
 	public final Signal<Entity> componentAdded;
 	/** Will dispatch an event when a component is removed. */
 	public final Signal<Entity> componentRemoved;
-
+	/** Will dispatch an event when a component is added. */
+	public final Signal<EntityComponentWrapper> componentInstanceAdded;
+	/** Will dispatch an event when a component is removed. */
+	public final Signal<EntityComponentWrapper> componentInstanceRemoved;
+	
 	boolean scheduledForRemoval;
 	boolean removing;
 	ComponentOperationHandler componentOperationHandler;
@@ -55,6 +60,8 @@ public class Entity {
 
 		componentAdded = new Signal<Entity>();
 		componentRemoved = new Signal<Entity>();
+		componentInstanceAdded = new Signal<EntityComponentWrapper>();
+		componentInstanceRemoved = new Signal<EntityComponentWrapper>();
 	}
 
 	/**
@@ -64,10 +71,10 @@ public class Entity {
 	public Entity add (Component component) {
 		if (addInternal(component)) {
 			if (componentOperationHandler != null) {
-				componentOperationHandler.add(this);
+				componentOperationHandler.add(this, component);
 			}
 			else {
-				notifyComponentAdded();
+				notifyComponentAdded(component);
 			}
 		}
 		
@@ -97,10 +104,10 @@ public class Entity {
 	
 			if (removeComponent != null && removeInternal(componentClass) != null) {
 				if (componentOperationHandler != null) {
-					componentOperationHandler.remove(this);
+					componentOperationHandler.remove(this, removeComponent);
 				}
 				else {
-					notifyComponentRemoved();
+					notifyComponentRemoved(removeComponent);
 				}
 			}
 	
@@ -212,12 +219,26 @@ public class Entity {
 		return null;
 	}
 	
-	void notifyComponentAdded() {
+	void notifyComponentAdded(Component component) {
 		componentAdded.dispatch(this);
+
+		if(componentOperationHandler != null){ // In that case the entity is already in the engine so we dispatch an event.
+			componentInstanceAdded.dispatch(getEntityComponentWrapper(component));
+		}
+	}
+
+	private EntityComponentWrapper getEntityComponentWrapper(Component component) {
+		EntityComponentWrapper wrapper = componentOperationHandler.poolEntityWrapperComponent();
+		wrapper.entity = this;
+		wrapper.component = component;
+		return wrapper;
 	}
 	
-	void notifyComponentRemoved() {
+	void notifyComponentRemoved(Component component) {
 		componentRemoved.dispatch(this);
+		if(componentOperationHandler != null){ // In that case the entity is already in the engine so we dispatch an event.
+			componentInstanceRemoved.dispatch(getEntityComponentWrapper(component));
+		}
 	}
 
 	/** @return true if the entity is scheduled to be removed */

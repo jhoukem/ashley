@@ -1,37 +1,39 @@
 package com.badlogic.ashley.core;
 
+import com.badlogic.ashley.core.Engine.EntityComponentWrapper;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
 
 class ComponentOperationHandler {
 	private BooleanInformer delayed;
-	private ComponentOperationPool operationPool = new ComponentOperationPool();;
- 	private Array<ComponentOperation> operations = new Array<ComponentOperation>();;
+	private ComponentOperationPool operationPool = new ComponentOperationPool();
+	private EntityComponentWrapperPool entityComponentWrapperPool = new EntityComponentWrapperPool();
+ 	private Array<ComponentOperation> operations = new Array<ComponentOperation>();
 
  	public ComponentOperationHandler(BooleanInformer delayed) {
  		this.delayed = delayed;
  	}
  	
-	public void add(Entity entity) {
+	public void add(Entity entity, Component component) {
 		if (delayed.value()) {
 			ComponentOperation operation = operationPool.obtain();
-			operation.makeAdd(entity);
+			operation.makeAdd(entity, component);
 			operations.add(operation);
 		}
 		else {
-			entity.notifyComponentAdded();
+			entity.notifyComponentAdded(component);
 		}
 	}
 
-	public void remove(Entity entity) {
+	public void remove(Entity entity, Component component) {
 		if (delayed.value()) {
 			ComponentOperation operation = operationPool.obtain();
-			operation.makeRemove(entity);
+			operation.makeRemove(entity, component);
 			operations.add(operation);
 		}
 		else {
-			entity.notifyComponentRemoved();
+			entity.notifyComponentRemoved(component);
 		}
 	}
 	
@@ -45,10 +47,10 @@ class ComponentOperationHandler {
 
 			switch(operation.type) {
 				case Add:
-					operation.entity.notifyComponentAdded();
+					operation.entity.notifyComponentAdded(operation.component);
 					break;
 				case Remove:
-					operation.entity.notifyComponentRemoved();
+					operation.entity.notifyComponentRemoved(operation.component);
 					break;
 				default: break;
 			}
@@ -59,6 +61,14 @@ class ComponentOperationHandler {
 		operations.clear();
 	}
 	
+	public EntityComponentWrapper poolEntityWrapperComponent(){
+		return entityComponentWrapperPool.obtain();
+	}
+	
+	public void freeEntityComponentWrapper(EntityComponentWrapper entityComponentWrapper){
+		entityComponentWrapperPool.free(entityComponentWrapper);
+	}
+	
 	private static class ComponentOperation implements Pool.Poolable {
 		public enum Type {
 			Add,
@@ -67,20 +77,24 @@ class ComponentOperationHandler {
 
 		public Type type;
 		public Entity entity;
-
-		public void makeAdd(Entity entity) {
+		public Component component;
+		
+		public void makeAdd(Entity entity, Component component) {
 			this.type = Type.Add;
 			this.entity = entity;
+			this.component = component;
 		}
 
-		public void makeRemove(Entity entity) {
+		public void makeRemove(Entity entity, Component component) {
 			this.type = Type.Remove;
 			this.entity = entity;
+			this.component = component;
 		}
 
 		@Override
 		public void reset() {
 			entity = null;
+			component = null;
 		}
 	}
 	
@@ -88,6 +102,13 @@ class ComponentOperationHandler {
 		@Override
 		protected ComponentOperation newObject() {
 			return new ComponentOperation();
+		}
+	}
+	
+	private static class EntityComponentWrapperPool extends Pool<EntityComponentWrapper> {
+		@Override
+		protected EntityComponentWrapper newObject () {
+			return new EntityComponentWrapper();
 		}
 	}
 	
