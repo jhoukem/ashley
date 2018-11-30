@@ -261,7 +261,6 @@ public class Engine {
 		entity.componentRemoved.add(componentRemoved);
 		entity.componentOperationHandler = componentOperationHandler;
 		
-		componentInstanceListener.entityAdded(entity);
 		familyManager.updateFamilyMembership(entity);
 	}
 	
