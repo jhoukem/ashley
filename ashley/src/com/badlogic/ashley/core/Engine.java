@@ -82,6 +82,7 @@ public class Engine {
 	public void addEntity(Entity entity){
 		boolean delayed = updating || familyManager.notifying();
 		entityManager.addEntity(entity, delayed);
+		entity.componentInstanceListener = componentInstanceListener;
 	}
 
 	/**
@@ -90,6 +91,7 @@ public class Engine {
 	public void removeEntity(Entity entity){
 		boolean delayed = updating || familyManager.notifying();
 		entityManager.removeEntity(entity, delayed);
+		entity.componentInstanceListener = null;
 	}
 	
 	/**
@@ -256,7 +258,6 @@ public class Engine {
 		entity.componentAdded.add(componentAdded);
 		entity.componentRemoved.add(componentRemoved);
 		entity.componentOperationHandler = componentOperationHandler;
-		entity.componentInstanceListener = componentInstanceListener;
 		
 		componentInstanceListener.addEntity(entity);
 		familyManager.updateFamilyMembership(entity);
@@ -268,7 +269,6 @@ public class Engine {
 		entity.componentAdded.remove(componentAdded);
 		entity.componentRemoved.remove(componentRemoved);
 		entity.componentOperationHandler = null;
-		entity.componentInstanceListener = null;
 	}
 	
 	public void setComponentInstanceListener(ComponentInstanceListener componentInstanceListener) {
