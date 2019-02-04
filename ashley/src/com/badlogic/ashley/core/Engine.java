@@ -83,6 +83,7 @@ public class Engine {
 		// Call the add directly without delay.
 		componentInstanceListener.entityAdded(entity);
 		entity.componentInstanceListener = componentInstanceListener;
+
 		boolean delayed = updating || familyManager.notifying();
 		entityManager.addEntity(entity, delayed);
 	}
@@ -260,7 +261,6 @@ public class Engine {
 		entity.componentRemoved.add(componentRemoved);
 		entity.componentOperationHandler = componentOperationHandler;
 		
-		componentInstanceListener.entityAdded(entity);
 		familyManager.updateFamilyMembership(entity);
 	}
 	
