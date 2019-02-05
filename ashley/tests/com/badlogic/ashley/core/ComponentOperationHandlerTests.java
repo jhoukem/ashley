@@ -1,13 +1,11 @@
 package com.badlogic.ashley.core;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import org.junit.Test;
-
 import com.badlogic.ashley.core.ComponentOperationHandler.BooleanInformer;
 import com.badlogic.ashley.signals.Listener;
 import com.badlogic.ashley.signals.Signal;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class ComponentOperationHandlerTests {
 
@@ -34,16 +32,17 @@ public class ComponentOperationHandlerTests {
 	}
 	
 	private static class ComponentInstanceListenerSpy extends ComponentInstanceListener {
-		public boolean called;
-		
+		public int addedCalledCount;
+		public int removedCalledCount;
+
 		@Override
 		public void added(Entity entity, Component object) {
-			called = true;
+			addedCalledCount++;
 		}
 		
 		@Override
 		public void removed(Entity entity, Component object) {
-			called = true;
+			removedCalledCount++;
 		}
 	}
 	
@@ -63,7 +62,7 @@ public class ComponentOperationHandlerTests {
 		handler.add(entity, new ComponentMock());
 		
 		assertTrue(componentSpy.called);
-		assertTrue(componentListenerSpy.called);
+		assertEquals(componentListenerSpy.addedCalledCount, 1);
 	}
 
 	@Test
@@ -83,10 +82,10 @@ public class ComponentOperationHandlerTests {
 		handler.add(entity, new ComponentMock());
 		
 		assertFalse(componentSpy.called);
-		assertFalse(componentListenerSpy.called);
+		assertEquals(componentListenerSpy.addedCalledCount, 0);
 		handler.processOperations();
 		assertTrue(componentSpy.called);
-		assertTrue(componentListenerSpy.called);
+		assertEquals(componentListenerSpy.addedCalledCount, 1);
 	}
 	
 	@Test
@@ -104,7 +103,7 @@ public class ComponentOperationHandlerTests {
 		handler.remove(entity, new ComponentMock());
 		
 		assertTrue(componentSpy.called);
-		assertTrue(componentListenerSpy.called);
+		assertEquals(componentListenerSpy.removedCalledCount, 1);
 	}
 	
 	@Test
@@ -126,6 +125,6 @@ public class ComponentOperationHandlerTests {
 		assertFalse(spy.called);
 		handler.processOperations();
 		assertTrue(spy.called);
-		assertTrue(componentListenerSpy.called);
+		assertEquals(componentListenerSpy.removedCalledCount, 1);
 	}
 }
