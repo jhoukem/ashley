@@ -4,7 +4,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
 
-class ComponentOperationHandler {
+public class ComponentOperationHandler {
 	private BooleanInformer delayed;
 	private ComponentOperationPool operationPool = new ComponentOperationPool();
  	private Array<ComponentOperation> operations = new Array<ComponentOperation>();

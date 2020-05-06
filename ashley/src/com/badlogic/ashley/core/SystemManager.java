@@ -8,7 +8,7 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 
-class SystemManager {
+public class SystemManager {
 	private SystemComparator systemComparator = new SystemComparator();
 	private Array<EntitySystem> systems = new Array<EntitySystem>(true, 16);
 	private ImmutableArray<EntitySystem> immutableSystems = new ImmutableArray<EntitySystem>(systems);
