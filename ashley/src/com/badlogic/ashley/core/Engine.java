@@ -46,13 +46,13 @@ public class Engine {
 	private final Listener<Entity> componentAdded = new ComponentListener();
 	private final Listener<Entity> componentRemoved = new ComponentListener();
 	
-	private SystemManager systemManager = new SystemManager(new EngineSystemListener());
-	private EntityManager entityManager = new EntityManager(new EngineEntityListener());
-	private ComponentOperationHandler componentOperationHandler = new ComponentOperationHandler(new EngineDelayedInformer());
-	private FamilyManager familyManager = new FamilyManager(entityManager.getEntities());	
-	private ComponentInstanceListener componentInstanceListener = new ComponentInstanceListener();	
+	protected SystemManager systemManager = new SystemManager(new EngineSystemListener());
+	protected EntityManager entityManager = new EntityManager(new EngineEntityListener());
+	protected ComponentOperationHandler componentOperationHandler = new ComponentOperationHandler(new EngineDelayedInformer());
+	protected FamilyManager familyManager = new FamilyManager(entityManager.getEntities());
+	private ComponentInstanceListener componentInstanceListener = new ComponentInstanceListener();
 
-	private boolean updating;
+	protected boolean updating;
 
 	/**
 	 * Creates a new Entity object.
